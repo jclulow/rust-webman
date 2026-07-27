@@ -209,8 +209,8 @@ mod test {
             t.append(c);
         }
         t.append(']');
-        println!("{:#?}", t);
-        assert_eq!(t.to_html(false), "[<u>user</u>]\n");
+        println!("{t:#?}");
+        assert_eq!(t.to_html(false), vec!["[<u>user</u>]".to_string()]);
     }
 
     #[test]
@@ -222,8 +222,8 @@ mod test {
             t.append('\x08');
             t.append(c);
         }
-        println!("{:#?}", t);
-        assert_eq!(t.to_html(false), "<b>LC_MESSAGES</b>\n");
+        println!("{t:#?}");
+        assert_eq!(t.to_html(false), vec!["<b>LC_MESSAGES</b>".to_string()]);
     }
 
     #[test]
@@ -242,8 +242,11 @@ mod test {
             t.append('\x08');
             t.append(c);
         }
-        println!("{:#?}", t);
-        assert_eq!(t.to_html(false), "<b>ENVIRONMENT VARIABLES</b>\n");
+        println!("{t:#?}");
+        assert_eq!(
+            t.to_html(false),
+            vec!["<b>ENVIRONMENT VARIABLES</b>".to_string()]
+        );
     }
 
     #[test]
@@ -311,11 +314,13 @@ mod test {
         println!("{:#?}", t);
         assert_eq!(
             t.to_html(true),
-            "hello<br>\n\
-            <u>world</u><br>\n\
-            in <b>bold</b><br>\n\
-            <br>\n\
-            <b><u>fin</u></b><br>\n"
+            vec![
+                "hello<br>".to_string(),
+                "<u>world</u><br>".to_string(),
+                "in <b>bold</b><br>".to_string(),
+                "<br>".to_string(),
+                "<b><u>fin</u></b><br>".to_string()
+            ],
         );
     }
 }
