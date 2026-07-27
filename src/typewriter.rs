@@ -21,9 +21,10 @@ impl Typewriter {
         }
     }
 
-    pub fn to_html(&mut self, include_br: bool) -> String {
-        let mut html = String::new();
+    pub fn to_html(&mut self, include_br: bool) -> Vec<String> {
+        let mut out = Vec::new();
 
+        let mut html = String::new();
         for l in self.page.iter_mut() {
             let mut stk: VecDeque<char> = VecDeque::new();
 
@@ -123,13 +124,14 @@ impl Typewriter {
             }
 
             if include_br {
-                html.push_str("<br>\n");
-            } else {
-                html.push('\n');
+                html.push_str("<br>");
             }
+
+            out.push(html);
+            html = String::new();
         }
 
-        html
+        out
     }
 
     pub fn append(&mut self, c: char) {

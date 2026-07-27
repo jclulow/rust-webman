@@ -1,0 +1,9 @@
+{#- Copyright 2026 Oxide Computer Company -#}
+{%- extends "base.html" %}
+{%- block title %}manual page: {{ name }}({{ section }}){% endblock title %}
+{%- block body %}
+<div class="manpage">
+{{ content | safe }}
+</div>
+{%- endblock body %}
+{# vim: syn=htmldjango sw=4 ts=4 sts=4 et #}

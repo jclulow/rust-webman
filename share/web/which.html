@@ -1,0 +1,26 @@
+{#- Copyright 2026 Oxide Computer Company -#}
+{%- extends "base.html" %}
+{%- block title %}manual lookup for {{ name }}{% endblock title %}
+{%- block body %}
+<h1>helios: manual lookup for {{ name }}</h1>
+<p>More than one section contains a matching page:</p>
+<table>
+{%- for s in sections %}
+    <tr>
+        <td>
+            <h2>{{ s.heading }}</h2>
+        </td>
+    </tr>
+    {%- for p in s.pages %}
+    <tr>
+        <td>
+            <a href="/man/{{ s.name | upper }}/{{ p }}">
+                {{ p }}({{ s.name | upper }})
+            </a>
+        </td>
+    </tr>
+    {%- endfor %}
+{%- endfor %}
+</table>
+{%- endblock body %}
+{# vim: syn=htmldjango sw=4 ts=4 sts=4 et #}

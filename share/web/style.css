@@ -1,0 +1,25 @@
+{#- Copyright 2026 Oxide Computer Company -#}
+body {
+    padding: 25px;
+    font-size: 14px;
+    font-family: monospace;
+}
+h2, h3, h4 {
+    font-size: 14px;
+    font-family: monospace;
+}
+h4 {
+    font-weight: inherit;
+    margin: inherit;
+}
+.manpage {
+    white-space: pre;
+}
+a#link {
+    color: #6600FF;
+}
+.anc {
+    text-decoration: none;
+    color: inherit;
+}
+{#- vim: sw=4 ts=4 sts=4 et -#}

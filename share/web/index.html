@@ -1,0 +1,33 @@
+{#- Copyright 2026 Oxide Computer Company -#}
+{%- extends "base.html" %}
+{%- block title %}manual sections{% endblock title %}
+{%- block body %}
+<h1>helios: manual sections</h1>
+<table>
+{%- for s in catalogue %}
+    <tr>
+        <td colspan="2">
+            <h2>section {{ s.name }}: {{ s.title }}</h2>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="/man/{{ s.name }}/intro">intro.{{ s.name }}</a>
+        </td>
+        <td>Section Introduction</td>
+    </tr>
+    <tr>
+        <td colspan="2">&nbsp;</td>
+    </tr>
+    {%- for ss in s.subsections %}
+    <tr>
+        <td>
+            <a href="/man/{{ ss.name }}/all">{{ ss.name | upper }}</a>
+        </td>
+        <td>{{ ss.title }}</td>
+    </tr>
+    {%- endfor %}
+{%- endfor %}
+</table>
+{%- endblock body %}
+{# vim: syn=htmldjango sw=4 ts=4 sts=4 et #}

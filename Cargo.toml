@@ -8,5 +8,16 @@ edition = "2018"
 
 [dependencies]
 anyhow = "1"
+dropshot = "0.17.1"
+getopts = "0.2.24"
+http = "1.4.2"
+hyper = "1.11.0"
 jmclib = { git = "https://github.com/jclulow/rust-jmclib.git" }
+regex = "1.13.1"
+schemars = "0.8"
 serde = { version = "1", features = [ "derive" ]}
+slog = "2.8.2"
+slog-bunyan = "2.5.0"
+slog-term = "2.9.2"
+tera = { version = "2.1.0", features = ["glob_fs"] }
+tokio = { version = "1.53.1", features = ["full"] }

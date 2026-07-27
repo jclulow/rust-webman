@@ -1,0 +1,39 @@
+{#- Copyright 2026 Oxide Computer Company -#}
+{%- extends "base.html" %}
+{%- block title %}manual section {{ name | upper }} index{% endblock title %}
+{%- block body %}
+<h1>helios: manual section {{ name | upper }} index</h1>
+<table>
+    <tr>
+        <td colspan="2">
+            <h2>{{ title }}</h2>
+        </td>
+    </tr>
+{%- for p in pages %}
+    {%- if p == "intro" -%}
+        {%- set did_intro = true -%}
+    <tr>
+        <td>
+            <a href="/man/{{ p }}/intro">{{ p }}</a>
+            (Section Introduction)
+        </td>
+    </tr>
+    {%- endif -%}
+{%- endfor %}
+{% if did_intro %}
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+{% endif %}
+{%- for p in pages %}
+    {%- if p != "intro" -%}
+    <tr>
+        <td>
+            <a href="/man/{{ name }}/{{ p }}">{{ p }}</a>
+        </td>
+    </tr>
+    {%- endif -%}
+{%- endfor %}
+</table>
+{%- endblock body %}
+{# vim: syn=htmldjango sw=4 ts=4 sts=4 et #}
