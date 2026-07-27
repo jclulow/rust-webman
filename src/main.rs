@@ -1,14 +1,18 @@
-use std::path::Path;
-use std::sync::LazyLock;
-use std::{io::Read, sync::Arc};
+/*
+ * Copyright 2026 Oxide Computer Company
+ */
 
-use anyhow::{anyhow, bail, Result};
+use std::path::Path;
+use std::sync::Arc;
+use std::sync::LazyLock;
+
+use anyhow::{Result, anyhow, bail};
 use dropshot::{
-    endpoint, ApiDescription, Body, ConfigDropshot, HttpError,
-    HttpServerStarter, Path as TypedPath, RequestContext,
+    ApiDescription, Body, ConfigDropshot, HttpError, HttpServerStarter,
+    Path as TypedPath, RequestContext, endpoint,
 };
 use http::Response;
-use regex::{Captures, Regex};
+use regex::Regex;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use slog::info;
@@ -19,6 +23,8 @@ mod common;
 use common::*;
 mod mandir;
 mod typewriter;
+
+const MANDOC: &str = "/usr/bin/mandoc";
 
 type DSResult<T> = std::result::Result<T, dropshot::HttpError>;
 
@@ -38,6 +44,7 @@ struct App {
 async fn main() -> Result<()> {
     let opts = getopts::Options::new()
         .optopt("b", "", "bind address:port", "BIND_ADDRESS")
+        .optmulti("M", "", "add manual page directory", "MANPATH")
         .parsing_style(getopts::ParsingStyle::StopAtFirstFree)
         .parse(std::env::args_os().skip(1))?;
 
@@ -61,8 +68,16 @@ async fn main() -> Result<()> {
     )?;
 
     let cat = jmclib::dirs::rootpath("share/manual.toml")?;
-    let mut md = mandir::Mandir::new(&cat, "/usr/bin/mandoc")?;
-    md.add_mandir("/usr/share/man")?;
+    let mut md = mandir::Mandir::new(&cat)?;
+
+    let mandirs = opts.opt_strs("M");
+    if mandirs.is_empty() {
+        md.add_mandir("/usr/share/man")?;
+    } else {
+        for m in mandirs {
+            md.add_mandir(&m)?;
+        }
+    }
 
     info!(log, "mandir: {md:#?}");
     info!(log, "index: {:#?}", md.index()?);
@@ -260,7 +275,7 @@ fn anchor_name(h: &str) -> String {
 }
 
 async fn render(path: &Path, width: u32) -> DSResult<String> {
-    let res = Command::new("/usr/bin/mandoc")
+    let res = Command::new(MANDOC)
         .env_clear()
         .env("LANG", "C.UTF-8")
         .env("LC_ALL", "C.UTF-8")

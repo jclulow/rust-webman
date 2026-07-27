@@ -1,5 +1,8 @@
-use super::common::*;
-use anyhow::{anyhow, bail, Result};
+/*
+ * Copyright 2026 Oxide Computer Company
+ */
+
+use anyhow::{Result, anyhow, bail};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
@@ -8,7 +11,6 @@ use std::path::{Path, PathBuf};
 pub struct Mandir {
     cat: Catalogue,
     manpath: Vec<PathBuf>,
-    mandoc: PathBuf,
     sections: BTreeSet<String>,
     subsections: BTreeSet<String>,
 }
@@ -48,11 +50,7 @@ pub struct PageLookup {
 }
 
 impl Mandir {
-    pub fn new<P1, P2>(cat: P1, mandoc: P2) -> Result<Mandir>
-    where
-        P1: AsRef<Path>,
-        P2: AsRef<Path>,
-    {
+    pub fn new<P: AsRef<Path>>(cat: P) -> Result<Mandir> {
         let catpath = cat.as_ref();
         let cat: Catalogue = jmclib::toml::read_file(catpath)?
             .ok_or(anyhow!("catalogue file {}", catpath.display()))?;
@@ -72,7 +70,6 @@ impl Mandir {
         Ok(Mandir {
             cat,
             manpath: Vec::new(),
-            mandoc: mandoc.as_ref().to_path_buf(),
             sections: BTreeSet::new(),
             subsections: BTreeSet::new(),
         })
@@ -113,10 +110,16 @@ impl Mandir {
         let mut pagelist: Vec<String> = Vec::new();
 
         for mandir in self.manpath.iter() {
-            let mut d = mandir.clone();
-            d.push(&format!("man{}", sect));
+            let d = mandir.join(&format!("man{sect}"));
+            if !d.is_dir() {
+                /*
+                 * Not all manual paths will contain all sections.
+                 */
+                continue;
+            }
 
             let mut rd = std::fs::read_dir(&d)?;
+
             while let Some(ent) = rd.next().transpose()? {
                 let n = ent
                     .file_name()

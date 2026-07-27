@@ -1,3 +1,7 @@
+/*
+ * Copyright 2026 Oxide Computer Company
+ */
+
 use std::{io::IsTerminal, sync::Mutex};
 
 use slog::{o, Drain, Logger};
