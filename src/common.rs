@@ -1,6 +1,6 @@
 use std::{io::IsTerminal, sync::Mutex};
 
-use slog::{Drain, Logger, o};
+use slog::{o, Drain, Logger};
 
 pub fn make_log(name: &'static str, debug_var: &'static str) -> Logger {
     let filter_level = match std::env::var(debug_var)

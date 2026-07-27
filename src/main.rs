@@ -1,10 +1,11 @@
+use std::path::Path;
 use std::sync::LazyLock;
 use std::{io::Read, sync::Arc};
 
-use anyhow::{Result, anyhow, bail};
+use anyhow::{anyhow, bail, Result};
 use dropshot::{
-    ApiDescription, Body, ConfigDropshot, HttpError, HttpServerStarter,
-    Path as TypedPath, RequestContext, endpoint,
+    endpoint, ApiDescription, Body, ConfigDropshot, HttpError,
+    HttpServerStarter, Path as TypedPath, RequestContext,
 };
 use http::Response;
 use regex::{Captures, Regex};
@@ -258,75 +259,14 @@ fn anchor_name(h: &str) -> String {
     h.to_lowercase().replace(' ', "-").replace('_', "-")
 }
 
-#[derive(Serialize)]
-struct WhichSection {
-    name: String,
-    heading: String,
-    pages: Vec<String>,
-}
-
-#[endpoint {
-    method = GET,
-    path = "/man/{section}/{page}",
-}]
-pub async fn page_page_get(
-    rc: RequestContext<Arc<App>>,
-    path: TypedPath<SectionPagePath>,
-) -> DSResult<Response<Body>> {
-    let a = rc.context();
-    let path = path.into_inner();
-
-    let Some(subsect) =
-        a.mandir.lookup_subsection(&path.section).map_err(|e| {
-            HttpError::for_internal_error(format!("subsection lookup: {e}"))
-        })?
-    else {
-        return Err(HttpError::for_not_found(
-            None,
-            format!("section {:?} not found", path.section),
-        ));
-    };
-
-    let pages = match path.page.as_str() {
-        "" | "all" => {
-            return Ok(hyper::Response::builder()
-                .status(hyper::StatusCode::SEE_OTHER)
-                .header(
-                    hyper::header::LOCATION,
-                    &format!("/man/{}", subsect.name.to_uppercase()),
-                )
-                .body(dropshot::Body::empty())?);
-        }
-        other => a.mandir.lookup_page(Some(&subsect), other).map_err(|e| {
-            HttpError::for_internal_error(format!("page lookup: {e}"))
-        })?,
-    };
-
-    if pages.is_empty() {
-        return Err(HttpError::for_not_found(
-            None,
-            format!("page {:?} not found", path.page),
-        ));
-    };
-    let page = &pages[0];
-
-    if page.redirect {
-        return Ok(hyper::Response::builder()
-            .status(hyper::StatusCode::SEE_OTHER)
-            .header(
-                hyper::header::LOCATION,
-                &format!("/man/{}/{}", page.section.to_uppercase(), page.name),
-            )
-            .body(dropshot::Body::empty())?);
-    }
-
+async fn render(path: &Path, width: u32) -> DSResult<String> {
     let res = Command::new("/usr/bin/mandoc")
         .env_clear()
         .env("LANG", "C.UTF-8")
         .env("LC_ALL", "C.UTF-8")
         .arg("-Tascii")
-        .arg("-Owidth=80")
-        .arg(&page.path)
+        .arg(&format!("-Owidth={width}"))
+        .arg(path)
         .output()
         .await
         .map_err(|e| HttpError::for_internal_error(format!("mandoc: {e}")))?;
@@ -406,10 +346,79 @@ pub async fn page_page_get(
         html.push('\n');
     }
 
+    Ok(html)
+}
+
+#[derive(Serialize)]
+struct WhichSection {
+    name: String,
+    heading: String,
+    pages: Vec<String>,
+}
+
+#[endpoint {
+    method = GET,
+    path = "/man/{section}/{page}",
+}]
+pub async fn page_page_get(
+    rc: RequestContext<Arc<App>>,
+    path: TypedPath<SectionPagePath>,
+) -> DSResult<Response<Body>> {
+    let a = rc.context();
+    let path = path.into_inner();
+
+    let Some(subsect) =
+        a.mandir.lookup_subsection(&path.section).map_err(|e| {
+            HttpError::for_internal_error(format!("subsection lookup: {e}"))
+        })?
+    else {
+        return Err(HttpError::for_not_found(
+            None,
+            format!("section {:?} not found", path.section),
+        ));
+    };
+
+    let pages = match path.page.as_str() {
+        "" | "all" => {
+            return Ok(hyper::Response::builder()
+                .status(hyper::StatusCode::SEE_OTHER)
+                .header(
+                    hyper::header::LOCATION,
+                    &format!("/man/{}", subsect.name.to_uppercase()),
+                )
+                .body(dropshot::Body::empty())?);
+        }
+        other => a.mandir.lookup_page(Some(&subsect), other).map_err(|e| {
+            HttpError::for_internal_error(format!("page lookup: {e}"))
+        })?,
+    };
+
+    if pages.is_empty() {
+        return Err(HttpError::for_not_found(
+            None,
+            format!("page {:?} not found", path.page),
+        ));
+    };
+    let page = &pages[0];
+
+    if page.redirect {
+        return Ok(hyper::Response::builder()
+            .status(hyper::StatusCode::SEE_OTHER)
+            .header(
+                hyper::header::LOCATION,
+                &format!("/man/{}/{}", page.section.to_uppercase(), page.name),
+            )
+            .body(dropshot::Body::empty())?);
+    }
+
+    let cols80 = render(&page.path, 80).await?;
+    let cols60 = render(&page.path, 60).await?;
+
     let mut ctx = Context::default();
     ctx.insert("name", &page.name);
     ctx.insert("section", &page.section);
-    ctx.insert("content", &html);
+    ctx.insert("content80", &cols80);
+    ctx.insert("content60", &cols60);
 
     a.render_template("page.html", ctx)
 }

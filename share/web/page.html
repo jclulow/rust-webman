@@ -2,8 +2,11 @@
 {%- extends "base.html" %}
 {%- block title %}manual page: {{ name }}({{ section }}){% endblock title %}
 {%- block body %}
-<div class="manpage">
-{{ content | safe }}
+<div class="manpage cols80">
+{{ content80 | safe }}
+</div>
+<div class="manpage cols60">
+{{ content60 | safe }}
 </div>
 {%- endblock body %}
 {# vim: syn=htmldjango sw=4 ts=4 sts=4 et #}

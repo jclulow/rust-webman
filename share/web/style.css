@@ -1,25 +1,145 @@
 {#- Copyright 2026 Oxide Computer Company -#}
-body {
-    padding: 25px;
-    font-size: 14px;
+/*
+ * Start with values tuned for mobile phone displays, using a size relative
+ * to the view port width:
+ */
+html {
     font-family: monospace;
+    font-size: 2.5vw;
 }
+body {
+    padding: 0.6rem;
+}
+
+/*
+ * Default to dark mode for browsers that are not coping with media queries:
+ */
+body {
+    background-color: #0B1418;
+    color: #b7b7b7;
+}
+
+h1, h2, h3, h4 {
+    color: #ffffff;
+}
+
+a {
+    color: #00e29b;
+}
+a:hover {
+    color: #80ffcb;
+}
+
+/*
+ * Dark mode colours:
+ */
+@media (prefers-color-scheme: dark) {
+    html {
+        background-color: #0B1418;
+        color: #b7b7b7;
+    }
+
+    h1, h2, h3, h4 {
+        color: #ffffff;
+    }
+
+    a {
+        color: #00e29b;
+    }
+    a:hover {
+        color: #80ffcb;
+    }
+}
+
+/*
+ * Light mode colours:
+ */
+@media (prefers-color-scheme: light) {
+    html {
+        background-color: #c7c7c7;
+        color: #0B1418;
+    }
+
+    h1, h2, h3, h4 {
+        color: #000000;
+    }
+
+    a {
+        color: #215240;
+    }
+    a:hover {
+        color: #518265;
+    }
+}
+
+/*
+ * Because wrapping is done by mandoc(1), we send both an 80- and a 60-column
+ * wide version of the manual to the client.  By default the 80-column version
+ * is invisible, then we use media queries to enable the wider version on
+ * displays above a certain size.
+ */
+ .cols80 {
+    display: none;
+}
+.cols60 {
+    display: block;
+}
+
+/*
+ * Stop growing the font size once the screen is a certain size.
+ */
+@media only screen and (min-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+    body {
+        padding: 3rem;
+    }
+
+    /*
+     * Switch from the 60- to 80-column version for wider displays:
+     */
+    .cols80 {
+        display: block;
+    }
+    .cols60 {
+        display: none;
+    }
+}
+
+/*
+ * Make H2 and below the same size as everything else:
+ */
 h2, h3, h4 {
-    font-size: 14px;
-    font-family: monospace;
+    font-size: 1rem;
 }
 h4 {
     font-weight: inherit;
     margin: inherit;
 }
+
+/*
+ * The manual page itself is preformatted monospace text:
+ */
 .manpage {
     white-space: pre;
 }
-a#link {
-    color: #6600FF;
+
+a {
+    text-decoration: none;
 }
+a:hover {
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/*
+ * Some headings are made into clickable anchors that you can deep link to, but
+ * we don't want to render them as links:
+ */
 .anc {
     text-decoration: none;
     color: inherit;
 }
+
 {#- vim: sw=4 ts=4 sts=4 et -#}

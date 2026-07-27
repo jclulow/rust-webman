@@ -15,10 +15,7 @@ struct Cell {
 
 impl Typewriter {
     pub fn new() -> Typewriter {
-        Typewriter {
-            page: vec![Vec::new()],
-            col: 0,
-        }
+        Typewriter { page: vec![Vec::new()], col: 0 }
     }
 
     pub fn to_html(&mut self, include_br: bool) -> Vec<String> {
@@ -34,14 +31,18 @@ impl Typewriter {
                  */
                 if !c.b {
                     while stk.contains(&'b') {
-                        html.push_str(&format!("</{}>",
-                            stk.pop_back().unwrap()));
+                        html.push_str(&format!(
+                            "</{}>",
+                            stk.pop_back().unwrap()
+                        ));
                     }
                 }
                 if !c.u {
                     while stk.contains(&'u') {
-                        html.push_str(&format!("</{}>",
-                            stk.pop_back().unwrap()));
+                        html.push_str(&format!(
+                            "</{}>",
+                            stk.pop_back().unwrap()
+                        ));
                     }
                 }
 
@@ -135,7 +136,9 @@ impl Typewriter {
     }
 
     pub fn append(&mut self, c: char) {
-        if c == '\x08' /* BS */ {
+        if c == '\x08'
+        /* BS */
+        {
             if self.col > 0 {
                 self.col -= 1;
             }
@@ -302,11 +305,13 @@ mod test {
         t.append('n');
 
         println!("{:#?}", t);
-        assert_eq!(t.to_html(true),
+        assert_eq!(
+            t.to_html(true),
             "hello<br>\n\
             <u>world</u><br>\n\
             in <b>bold</b><br>\n\
             <br>\n\
-            <b><u>fin</u></b><br>\n");
+            <b><u>fin</u></b><br>\n"
+        );
     }
 }
