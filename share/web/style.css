@@ -14,7 +14,7 @@ body {
 /*
  * Default to dark mode for browsers that are not coping with media queries:
  */
-body {
+html {
     background-color: #0B1418;
     color: #b7b7b7;
 }
@@ -56,8 +56,8 @@ a:hover {
  */
 @media (prefers-color-scheme: light) {
     html {
-        background-color: #c7c7c7;
-        color: #0B1418;
+        background-color: #eaeaea;
+        color: #181818;
     }
 
     h1, h2, h3, h4 {
@@ -65,7 +65,8 @@ a:hover {
     }
 
     a {
-        color: #215240;
+        color: #027925;
+        font-weight: 600;
     }
     a:hover {
         color: #518265;
